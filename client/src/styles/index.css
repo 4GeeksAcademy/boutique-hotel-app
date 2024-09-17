@@ -1,0 +1,50 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --color-primary: #8B5CF6;
+  --color-secondary: #61dafb;
+  --color-background: #282c34;
+  --color-text: #ffffff;
+}
+
+/* Custom Tailwind Components */
+@layer components {
+  .btn-primary {
+    @apply bg-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-transparent text-white border border-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition-colors;
+  }
+  .section-title {
+    @apply text-3xl font-bold mb-8 text-center;
+  }
+}
+
+@keyframes geometric-twinkle {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    opacity: 0.5;
+    transform: translate(10px, 10px) rotate(90deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(0, 20px) rotate(180deg);
+  }
+  75% {
+    opacity: 0.5;
+    transform: translate(-10px, 10px) rotate(270deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+.animate-geometric-twinkle {
+  animation: geometric-twinkle 10s ease-in-out infinite;
+}

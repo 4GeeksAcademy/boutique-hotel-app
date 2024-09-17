@@ -1,9 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const { PORT, NODE_ENV } = require('./environment');
 
 const app = express();
-const port = process.env.PORT || 5000;
-const fallbackPort = 5001;
 
 
 app.use((req, res, next) => {
@@ -34,17 +33,8 @@ app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from server!' });
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  }).on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${port} is busy, trying ${fallbackPort}`);
-      app.listen(fallbackPort, () => {
-        console.log(`Server running on port ${fallbackPort}`);
-      });
-    } else {
-      console.error(err);
-    }
+app.listen(PORT, () => {
+    console.log(`Server running in ${NODE_ENV} mode on port ${PORT}`);
   });
 
 
