@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -8,6 +9,7 @@ import ScrollGraph from './components/ScrollGraph';
 
 function App() {
   return (
+    <ThemeProvider>
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -16,6 +18,7 @@ function App() {
       </Routes>
       <ScrollGraph />
     </Layout>
+    </ThemeProvider>
   );
 }
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import './MagicTornadoHero.css';
 import { Particles } from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
+import { useTheme } from '../contexts/ThemeContext';
 
 const magicalFacts = [
   "The average person spends 6 months of their life waiting for red lights to turn green.",
@@ -13,6 +14,7 @@ const magicalFacts = [
 ];
 
 const MagicTornadoHero = () => {
+  const { isDarkMode } = useTheme();
   const [isInView, setIsInView] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
@@ -58,7 +60,7 @@ const MagicTornadoHero = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
-  
+
   const getContentStyle = () => ({
     transform: `translateY(${(1 - scrollProgress) * 30}px)`,
     opacity: Math.min(scrollProgress * 2, 1),
@@ -73,46 +75,13 @@ const MagicTornadoHero = () => {
     await loadSlim(engine);
   }, []);
 
-  return (
-    <div ref={sectionRef} className="magic-tornado-hero relative overflow-hidden">
-<Particles
-  id="tsparticles"
-  init={particlesInit}
-  options={{
-    background: {
-      color: {
-        value: "transparent",
-      },
-    },
-    fpsLimit: 60,
-    interactivity: {
-      events: {
-        onClick: {
-          enable: true,
-          mode: "push",
-        },
-        onHover: {
-          enable: true,
-          mode: "repulse",
-        },
-        resize: true,
-      },
-      modes: {
-        push: {
-          quantity: 4,
-        },
-        repulse: {
-          distance: 200,
-          duration: 0.4,
-        },
-      },
-    },
+  const particlesOptions = {
     particles: {
       color: {
-        value: "#8B5CF6",
+        value: "#3B82F6", // Changed to blue
       },
       links: {
-        color: "#8B5CF6",
+        color: "#60A5FA", // Lighter blue for links
         distance: 150,
         enable: true,
         opacity: 0.5,
@@ -146,41 +115,56 @@ const MagicTornadoHero = () => {
       },
     },
     detectRetina: true,
-  }}
-/>
-      <div className="tornado-background absolute inset-0">
-        {[...Array(10)].map((_, index) => (
-          <div 
-            key={index} 
-            className={`tornado-layer tornado-layer-${index + 1}`}
-            style={{ 
-              animationDelay: `${index * 0.2}s`,
-              transform: `rotateY(${index * 36}deg) translateZ(${50 + index * 10}px)`
-            }}
-          ></div>
-        ))}
-      </div>
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8 py-16">
-        <div className="text-center text-white transition-all duration-500 ease-out mb-16" style={getContentStyle()}>
-          <h2 className="text-5xl font-bold mb-4">Unleash the Magic of Knowledge</h2>
-          <p className="text-xl mb-8">Dive into a world of swirling mysteries and enchanting discoveries.</p>
-          <p className="text-lg mb-8">Our magical vortex brings you fascinating facts from across the universe, challenging your perception and expanding your mind.</p>
-          <button className="bg-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors mr-4">
-            Explore the Vortex
-          </button>
-          <button className="bg-transparent text-white border border-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition-colors">
-            Learn More
-          </button>
-        </div>
-        <div className="text-white mt-16 max-w-2xl mx-auto" style={getFactStyle()}>
-          <div className="magical-fact p-6 rounded-lg shadow-lg transition-all duration-500 ease-out">
-            <h3 className="text-2xl font-semibold mb-4">Did You Know?</h3>
-            <p className="text-lg">{magicalFacts[currentFactIndex]}</p>
-          </div>
-        </div>
-      </div>
+  };
+
+  return (
+    <div ref={sectionRef} className={`magic-tornado-hero relative overflow-hidden ${isDarkMode ? 'bg-background-dark' : 'bg-background-light'}`}>
+      <Particles id="tsparticles" init={particlesInit} options={particlesOptions} />
+      <TornadoBackground />
+      <Content 
+        contentStyle={getContentStyle()} 
+        factStyle={getFactStyle()} 
+        currentFact={magicalFacts[currentFactIndex]} 
+      />
     </div>
   );
 };
+
+const TornadoBackground = () => (
+  <div className="tornado-background absolute inset-0">
+    {[...Array(10)].map((_, index) => (
+      <div 
+        key={index} 
+        className={`tornado-layer tornado-layer-${index + 1}`}
+        style={{ 
+          animationDelay: `${index * 0.2}s`,
+          transform: `rotateY(${index * 36}deg) translateZ(${50 + index * 10}px)`
+        }}
+      ></div>
+    ))}
+  </div>
+);
+
+const Content = ({ contentStyle, factStyle, currentFact }) => (
+  <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8 py-16">
+    <div className="text-center text-white transition-all duration-500 ease-out mb-16" style={contentStyle}>
+      <h2 className="text-5xl font-bold mb-4 font-sans">Unleash the Magic of Knowledge</h2>
+      <p className="text-xl mb-8 font-sans">Dive into a world of swirling mysteries and enchanting discoveries.</p>
+      <p className="text-lg mb-8 font-sans">Our magical vortex brings you fascinating facts from across the universe, challenging your perception and expanding your mind.</p>
+      <button className="bg-primary text-white px-6 py-3 rounded-full font-semibold hover:bg-primary-dark transition-colors mr-4">
+        Explore the Vortex
+      </button>
+      <button className="bg-transparent text-white border border-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-primary transition-colors">
+        Learn More
+      </button>
+    </div>
+    <div className="text-white mt-16 max-w-2xl mx-auto" style={factStyle}>
+      <div className="magical-fact p-6 rounded-lg shadow-lg transition-all duration-500 ease-out">
+        <h3 className="text-2xl font-semibold mb-4 font-sans">Did You Know?</h3>
+        <p className="text-lg font-sans">{currentFact}</p>
+      </div>
+    </div>
+  </div>
+);
 
 export default MagicTornadoHero;

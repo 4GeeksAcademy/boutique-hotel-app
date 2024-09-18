@@ -3,22 +3,41 @@
 @import 'tailwindcss/utilities';
 
 :root {
-  --color-primary: #8B5CF6;
-  --color-secondary: #61dafb;
-  --color-background: #282c34;
-  --color-text: #ffffff;
+  --color-primary: theme('colors.primary.DEFAULT');
+  --color-primary-light: theme('colors.primary.light');
+  --color-primary-dark: theme('colors.primary.dark');
+  --color-secondary: theme('colors.secondary.DEFAULT');
+  --color-secondary-light: theme('colors.secondary.light');
+  --color-secondary-dark: theme('colors.secondary.dark');
+  --color-background: theme('colors.background.DEFAULT');
+  --color-background-light: theme('colors.background.light');
+  --color-background-dark: theme('colors.background.dark');
+  --color-text: theme('colors.text.DEFAULT');
+  --color-text-light: theme('colors.text.light');
+  --color-text-dark: theme('colors.text.dark');
 }
 
-/* Custom Tailwind Components */
+@layer base {
+  body {
+    @apply bg-background text-text font-sans;
+  }
+}
+
 @layer components {
+  .btn {
+    @apply px-6 py-3 rounded-full font-semibold transition-colors;
+  }
+
   .btn-primary {
-    @apply bg-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors;
+    @apply btn bg-primary text-white hover:bg-primary-dark;
   }
+
   .btn-secondary {
-    @apply bg-transparent text-white border border-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition-colors;
+    @apply btn bg-transparent text-white border border-white hover:bg-white hover:text-primary;
   }
+
   .section-title {
-    @apply text-3xl font-bold mb-8 text-center;
+    @apply text-3xl font-bold mb-8 text-center text-primary;
   }
 }
 

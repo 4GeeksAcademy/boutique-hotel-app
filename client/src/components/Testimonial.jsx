@@ -1,8 +1,11 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Testimonial = ({ name, role, quote, avatarUrl }) => {
+  const { isDarkMode } = useTheme();
+
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+    <div className={`${isDarkMode ? 'bg-background' : 'bg-background-light'} p-6 rounded-lg shadow-lg`}>
       <div className="flex items-center mb-4">
         <img
           src={avatarUrl}
@@ -10,11 +13,11 @@ const Testimonial = ({ name, role, quote, avatarUrl }) => {
           className="w-16 h-16 rounded-full mr-4 object-cover"
         />
         <div>
-          <h3 className="text-xl font-semibold text-white">{name}</h3>
-          <p className="text-purple-400">{role}</p>
+          <h3 className="text-xl font-semibold text-text font-sans">{name}</h3>
+          <p className="text-primary font-sans">{role}</p>
         </div>
       </div>
-      <p className="text-gray-300 italic">"{quote}"</p>
+      <p className="text-text-light italic font-serif">"{quote}"</p>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import Testimonial from './Testimonial';
 import Section from './Section';
+import { useTheme } from '../contexts/ThemeContext';
 
 const testimonials = [
   {
@@ -24,8 +25,10 @@ const testimonials = [
 ];
 
 const TestimonialSection = () => {
+  const { isDarkMode } = useTheme();
+
   return (
-    <Section title="What Our Users Say" className="bg-gray-900 text-white">
+    <Section title="What Our Users Say" className={`${isDarkMode ? 'bg-background-dark' : 'bg-background-light'} text-text`}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {testimonials.map((testimonial, index) => (
           <Testimonial key={index} {...testimonial} />
