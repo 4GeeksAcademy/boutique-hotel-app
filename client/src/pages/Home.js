@@ -1,38 +1,90 @@
 import React from 'react';
-import Hero from '../components/Hero';
-import QuoteAndStats from '../components/QuoteAndStats';
-import MysteriousContent from '../components/MysteriousContent';
-import MysterySlider from '../components/MysterySlider';
-import TestimonialSection from '../components/TestimonialSection';
-import MagicTornadoHero from '../components/MagicTornadoHero';
+import Section from '../components/ui/Section';
+import Button from '../components/ui/Button';
 
 function Home() {
-  const quoteData = {
-    quote: "The universe is full of magical things patiently waiting for our wits to grow sharper.",
-    author: "Eden Phillpotts",
-    stats: [
-      { value: "1000+", label: "Mysteries Solved" },
-      { value: "500", label: "Active Quests" },
-      { value: "10,000", label: "Adventurers" }
-    ]
-  };
-
   return (
-    <div>
-      <Hero />
-      <QuoteAndStats {...quoteData} />
-      <MysteriousContent />
-      <MysterySlider />
-      <TestimonialSection />
-      <MagicTornadoHero>
-        <div className="text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">Unleash the Magic</h2>
-          <p className="text-xl mb-8">Dive into a world of swirling mysteries and enchanting discoveries.</p>
-          <button className="bg-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors">
-            Explore the Vortex
-          </button>
+    <div className="bg-background text-text">
+      {/* Hero Section */}
+      <div className="relative h-[80vh]">
+        <div className="absolute inset-0 bg-black/50 z-10"></div>
+        <div 
+          className="absolute inset-0 bg-cover bg-center" 
+          style={{ backgroundImage: "url('/images/hotel-hero.jpg')" }}
+        ></div>
+        <div className="relative z-20 h-full flex items-center justify-center text-white">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 font-display">
+              Welcome to Luxury Living
+            </h1>
+            <p className="text-lg md:text-xl mb-8 font-sans">
+              Experience unparalleled comfort and exceptional service
+            </p>
+            <Button 
+              to="/rooms"
+              variant="primary"
+              size="lg"
+            >
+              Book Your Stay
+            </Button>
+          </div>
         </div>
-      </MagicTornadoHero>
+      </div>
+
+      {/* Features Section */}
+      <Section 
+        title="Experience Luxury" 
+        subtitle="Discover what makes us unique"
+        className="bg-background-light"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {[
+            {
+              title: "Elegant Rooms",
+              description: "Beautifully designed spaces for your comfort"
+            },
+            {
+              title: "Fine Dining",
+              description: "World-class cuisine at your doorstep"
+            },
+            {
+              title: "Premium Service",
+              description: "24/7 concierge and room service"
+            }
+          ].map((feature, index) => (
+            <div 
+              key={index}
+              className="text-center p-6 bg-white rounded-lg shadow-lg"
+            >
+              <h3 className="text-xl font-semibold mb-3 text-text-dark">
+                {feature.title}
+              </h3>
+              <p className="text-text-light">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Featured Rooms */}
+      <Section 
+        title="Featured Rooms" 
+        subtitle="Select your perfect stay"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Room cards will be added here */}
+        </div>
+        <div className="text-center mt-12">
+          <Button 
+            to="/rooms"
+            variant="outline"
+            size="lg"
+          >
+            View All Rooms
+          </Button>
+        </div>
+      </Section>
     </div>
   );
 }

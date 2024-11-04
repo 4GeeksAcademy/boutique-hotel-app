@@ -35,7 +35,7 @@ export default function Hero() {
         </p>
         <div className="space-x-4">
           <Button variant="primary">Begin Your Quest</Button>
-          <Button variant="secondary">Learn More</Button>
+          <Button variant="outline">Learn More</Button>
         </div>
       </div>
     </div>

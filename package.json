@@ -1,18 +1,9 @@
 {
-  "name": "website-template",
+  "name": "hotel-website",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && node index.js",
     "client": "cd client && npm start",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "concurrently": "^9.0.1"
+    "build": "cd client && npm run build"
   }
 }

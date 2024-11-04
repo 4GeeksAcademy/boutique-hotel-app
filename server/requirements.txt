@@ -1,0 +1,11 @@
+Flask==2.0.1
+Flask-SQLAlchemy==2.5.1
+Flask-JWT-Extended==4.3.1
+Flask-Migrate==3.1.0
+Flask-Cors==3.0.10
+psycopg2-binary==2.9.1
+python-dotenv==0.19.0
+Werkzeug==2.0.1
+SQLAlchemy==1.4.23
+stripe==2.65.0
+pytest==7.0.1 
