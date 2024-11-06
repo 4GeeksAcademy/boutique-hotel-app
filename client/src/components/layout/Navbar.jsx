@@ -1,59 +1,60 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Button from '../ui/Button';
 
-function Navbar() {
+const Navbar = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="bg-white shadow-lg">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-xl font-bold text-primary">
-            Luxury Hotel
-          </Link>
-          
-          <div className="hidden md:flex space-x-8">
-            <Link to="/" className="text-gray-600 hover:text-primary transition-colors">
-              Home
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <img
+                className="h-8 w-auto"
+                src="/logo.png"
+                alt="Logo"
+              />
             </Link>
-            <Link to="/rooms" className="text-gray-600 hover:text-primary transition-colors">
-              Rooms
-            </Link>
-            <Link to="/about" className="text-gray-600 hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link to="/contact" className="text-gray-600 hover:text-primary transition-colors">
-              Contact
-            </Link>
+            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <Link to="/" className="nav-link">Home</Link>
+              <Link to="/rooms" className="nav-link">Rooms</Link>
+              <Link to="/about" className="nav-link">About</Link>
+              <Link to="/contact" className="nav-link">Contact</Link>
+            </div>
           </div>
-
+          
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <Link to="/bookings" className="text-gray-600 hover:text-primary transition-colors">
-                  My Bookings
-                </Link>
-                <button
-                  onClick={logout}
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
-                >
+                <Link to="/bookings" className="nav-link">My Bookings</Link>
+                <Button onClick={handleLogout} variant="secondary">
                   Logout
-                </button>
+                </Button>
               </>
             ) : (
-              <Link
-                to="/login"
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors"
-              >
-                Login
-              </Link>
+              <>
+                <Link to="/login">
+                  <Button variant="secondary">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button>Sign Up</Button>
+                </Link>
+              </>
             )}
           </div>
         </div>
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

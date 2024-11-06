@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
 
 const Button = ({ 
   children, 
@@ -9,16 +10,16 @@ const Button = ({
   to,
   onClick,
   disabled,
+  loading = false,
+  fullWidth = false,
   type = 'button',
   ...props 
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors duration-200 rounded-lg';
+  const baseClasses = 'inline-flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
-    primary: 'bg-primary hover:bg-primary-dark text-white',
-    secondary: 'bg-secondary hover:bg-secondary-dark text-white',
-    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white',
-    ghost: 'text-primary hover:bg-primary/10',
+    primary: 'border-transparent text-white bg-primary hover:bg-primary-dark focus:ring-primary',
+    secondary: 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-primary'
   };
 
   const sizes = {
@@ -27,12 +28,20 @@ const Button = ({
     lg: 'px-6 py-3 text-lg',
   };
 
-  const classes = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
+  const widthClass = fullWidth ? 'w-full' : '';
+  const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${widthClass} ${className}`;
+
+  const buttonContent = (
+    <>
+      {loading && <LoadingSpinner size="sm" className="mr-2" />}
+      {children}
+    </>
+  );
 
   if (to) {
     return (
       <Link to={to} className={classes} {...props}>
-        {children}
+        {buttonContent}
       </Link>
     );
   }
@@ -41,11 +50,11 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={classes}
       {...props}
     >
-      {children}
+      {buttonContent}
     </button>
   );
 };

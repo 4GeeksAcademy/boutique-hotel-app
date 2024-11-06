@@ -47,8 +47,5 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6"
   },
-  "proxy": {
-    "/api": "http://localhost:5001",
-    "/images": "http://localhost:5001/images"
-  }
+  "proxy": "http://localhost:5000"
 }

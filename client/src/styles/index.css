@@ -2,21 +2,6 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-:root {
-  --color-primary: theme('colors.primary.DEFAULT');
-  --color-primary-light: theme('colors.primary.light');
-  --color-primary-dark: theme('colors.primary.dark');
-  --color-secondary: theme('colors.secondary.DEFAULT');
-  --color-secondary-light: theme('colors.secondary.light');
-  --color-secondary-dark: theme('colors.secondary.dark');
-  --color-background: theme('colors.background.DEFAULT');
-  --color-background-light: theme('colors.background.light');
-  --color-background-dark: theme('colors.background.dark');
-  --color-text: theme('colors.text.DEFAULT');
-  --color-text-light: theme('colors.text.light');
-  --color-text-dark: theme('colors.text.dark');
-}
-
 @layer base {
   body {
     @apply bg-background text-text font-sans;
@@ -34,10 +19,6 @@
 
   .btn-secondary {
     @apply btn bg-transparent text-white border border-white hover:bg-white hover:text-primary;
-  }
-
-  .section-title {
-    @apply text-3xl font-bold mb-8 text-center text-primary;
   }
 }
 

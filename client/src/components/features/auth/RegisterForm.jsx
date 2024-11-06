@@ -5,9 +5,9 @@ import Input from '../../ui/Input';
 import Button from '../../ui/Button';
 import AuthLayout from '../../layout/AuthLayout';
 
-const LoginForm = () => {
+const RegisterForm = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -18,22 +18,49 @@ const LoginForm = () => {
     
     try {
       const formData = new FormData(e.target);
-      await login(formData.get('email'), formData.get('password'));
+      const data = {
+        email: formData.get('email'),
+        password: formData.get('password'),
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName')
+      };
+      
+      if (formData.get('password') !== formData.get('confirmPassword')) {
+        throw new Error('Passwords do not match');
+      }
+      
+      await register(data);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
-      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
   };
   
   return (
-    <AuthLayout 
-      title="Welcome back"
-      subtitle="Please sign in to your account"
+    <AuthLayout
+      title="Create your account"
+      subtitle="Start booking your perfect stay"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <Input
+            label="First Name"
+            name="firstName"
+            type="text"
+            autoComplete="given-name"
+            required
+          />
+          <Input
+            label="Last Name"
+            name="lastName"
+            type="text"
+            autoComplete="family-name"
+            required
+          />
+        </div>
+        
         <Input
           label="Email"
           name="email"
@@ -41,34 +68,22 @@ const LoginForm = () => {
           autoComplete="email"
           required
         />
+        
         <Input
           label="Password"
           name="password"
           type="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           required
         />
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-              Remember me
-            </label>
-          </div>
-
-          <Link
-            to="/forgot-password"
-            className="text-sm font-medium text-blue-600 hover:text-blue-500"
-          >
-            Forgot your password?
-          </Link>
-        </div>
+        <Input
+          label="Confirm Password"
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          required
+        />
 
         {error && (
           <div className="rounded-md bg-red-50 p-4">
@@ -85,16 +100,16 @@ const LoginForm = () => {
           loading={loading}
           fullWidth
         >
-          Sign in
+          Create Account
         </Button>
 
         <div className="text-sm text-center">
-          <span className="text-gray-500">Don't have an account?</span>{' '}
+          <span className="text-gray-500">Already have an account?</span>{' '}
           <Link
-            to="/register"
+            to="/login"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            Sign up
+            Sign in
           </Link>
         </div>
       </form>
@@ -102,4 +117,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm; 
+export default RegisterForm; 

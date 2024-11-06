@@ -1,14 +1,46 @@
+# Python Virtual Environments (both root and subdirectories)
+venv/
+.venv/
+*/venv/
+*/.venv/
+env/
+.env/
+virtualenv/
+ENV/
+
 # Dependencies
-node_modules
-/client/node_modules
-/server/node_modules
+node_modules/
+**/node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Production build files
-/build
-/client/build
+/build/
+/client/build/
 
 # Environment variables
+venv/
+env/
 .env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
@@ -20,27 +52,35 @@ yarn-debug.log*
 yarn-error.log*
 
 # Editor directories and files
-.idea
-.vscode
+.idea/
+.vscode/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+
+# Testing
+/client/coverage/
+
+# Database
+*.db
+*.sqlite3
 
 # Tailwind CSS output
 /client/src/tailwind.output.css
 
-# Testing
-/client/coverage
-
-# Misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Static files
+/server/static/images/*
+!/server/static/images/.gitkeep
