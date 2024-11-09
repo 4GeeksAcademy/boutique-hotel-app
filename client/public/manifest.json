@@ -1,25 +1,16 @@
 {
-  "short_name": "Hotel App",
-  "name": "Hotel Booking Application",
+  "short_name": "BH",
+  "name": "Boutique Hotel",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "icons/logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "icons/logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' fill='%231e40af'/%3E%3Ctext x='32' y='40' font-family='Arial' font-size='30' fill='white' text-anchor='middle'%3EBH%3C/text%3E%3C/svg%3E",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#1e40af",
   "background_color": "#ffffff"
 }

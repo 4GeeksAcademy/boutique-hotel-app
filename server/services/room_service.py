@@ -1,37 +1,35 @@
-from models import Room, Booking
-from database import db
-from datetime import datetime
+from .base_service import BaseService
+from models import Room
 import logging
 
 logger = logging.getLogger(__name__)
 
-class RoomService:
-    @staticmethod
-    def get_all_rooms():
+class RoomService(BaseService):
+    @classmethod
+    def get_available_rooms(cls, room_type=None, capacity=None, max_price=None):
         try:
-            return Room.query.all()
+            query = Room.query.filter_by(is_available=True)
+            
+            if room_type:
+                query = query.filter_by(room_type=room_type)
+            if capacity:
+                query = query.filter(Room.capacity >= capacity)
+            if max_price:
+                query = query.filter(Room.price_per_night <= max_price)
+                
+            return query.all()
+            
         except Exception as e:
-            logger.error(f"Error getting all rooms: {str(e)}")
+            logger.error(f"Error fetching available rooms: {str(e)}")
             raise
 
-    @staticmethod
-    def get_room_by_id(room_id):
+    @classmethod
+    def update_room_availability(cls, room_id, is_available):
         try:
-            return Room.query.get_or_404(room_id)
+            room = Room.query.get_or_404(room_id)
+            room.is_available = is_available
+            cls.commit_changes()
+            return room
         except Exception as e:
-            logger.error(f"Error getting room by id {room_id}: {str(e)}")
-            raise
-
-    @staticmethod
-    def check_availability(room_id, check_in_date, check_out_date):
-        try:
-            overlapping_bookings = Booking.query.filter(
-                Booking.room_id == room_id,
-                Booking.check_out_date > check_in_date,
-                Booking.check_in_date < check_out_date,
-                Booking.booking_status != 'cancelled'
-            ).first()
-            return not bool(overlapping_bookings)
-        except Exception as e:
-            logger.error(f"Error checking room availability: {str(e)}")
+            logger.error(f"Error updating room availability: {str(e)}")
             raise 

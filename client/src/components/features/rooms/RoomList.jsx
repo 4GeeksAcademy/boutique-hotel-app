@@ -1,81 +1,182 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../../services/api';
+import RoomCard from './RoomCard';
+import RoomSearch from './RoomSearch';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function RoomList() {
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  const navigate = useNavigate();
+    const [rooms, setRooms] = useState([]);
+    const [filteredRooms, setFilteredRooms] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [filters, setFilters] = useState({
+        type: '',
+        minPrice: '',
+        maxPrice: '',
+        capacity: '',
+        checkIn: '',
+        checkOut: ''
+    });
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await axios.get('/api/rooms');
-        setRooms(response.data);
-      } catch (error) {
-        console.error('Error fetching rooms:', error);
-      } finally {
-        setLoading(false);
-      }
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchRooms = async () => {
+            try {
+                const response = await api.get('/rooms');
+                setRooms(response);
+                setFilteredRooms(response);
+            } catch (error) {
+                console.error('Error fetching rooms:', error);
+                setError('Failed to load rooms');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRooms();
+    }, []);
+
+    useEffect(() => {
+        let result = rooms;
+
+        if (filters.type) {
+            result = result.filter(room => room.roomType === filters.type);
+        }
+        if (filters.minPrice) {
+            result = result.filter(room => room.pricePerNight >= parseFloat(filters.minPrice));
+        }
+        if (filters.maxPrice) {
+            result = result.filter(room => room.pricePerNight <= parseFloat(filters.maxPrice));
+        }
+        if (filters.capacity) {
+            result = result.filter(room => room.capacity >= parseInt(filters.capacity));
+        }
+
+        setFilteredRooms(result);
+    }, [filters, rooms]);
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
-    fetchRooms();
-  }, []);
+    const calculateNights = (checkIn, checkOut) => {
+        if (!checkIn || !checkOut) return 0;
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+        return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    };
 
-  const handleBooking = (roomId) => {
-    if (!user) {
-      navigate('/login');
-    } else {
-      navigate(`/book/${roomId}`);
+    const handleBooking = async (roomId) => {
+        if (!user) {
+            navigate('/login', { 
+                state: { 
+                    from: '/rooms',
+                    bookingIntent: {
+                        roomId,
+                        checkIn: filters.checkIn,
+                        checkOut: filters.checkOut
+                    }
+                } 
+            });
+            return;
+        }
+
+        if (!filters.checkIn || !filters.checkOut) {
+            setError('Please select check-in and check-out dates');
+            return;
+        }
+
+        const nights = calculateNights(filters.checkIn, filters.checkOut);
+        if (nights <= 0) {
+            setError('Invalid date range selected');
+            return;
+        }
+
+        try {
+            // Check room availability first
+            const availabilityResponse = await api.post(`/rooms/${roomId}/availability`, {
+                checkIn: filters.checkIn,
+                checkOut: filters.checkOut
+            });
+
+            if (!availabilityResponse.available) {
+                setError(availabilityResponse.reason || 'Room is not available for selected dates');
+                return;
+            }
+
+            // Create booking
+            const bookingResponse = await api.post('/bookings', {
+                roomId,
+                checkInDate: filters.checkIn,
+                checkOutDate: filters.checkOut,
+                numberOfNights: nights
+            });
+
+            // Clear any existing errors
+            setError(null);
+
+            // Redirect to booking details with state
+            navigate(`/bookings/${bookingResponse.id}`, {
+                state: { 
+                    booking: bookingResponse,
+                    fromBooking: true 
+                }
+            });
+        } catch (error) {
+            console.error('Booking error:', error);
+            setError(error.response?.data?.error || 'Failed to create booking');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+                <LoadingSpinner />
+            </div>
+        );
     }
-  };
 
-  if (loading) {
-    return <div className="text-center py-8">Loading rooms...</div>;
-  }
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Available Rooms</h2>
+            
+            <RoomSearch 
+                filters={filters}
+                onFilterChange={handleFilterChange}
+            />
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {rooms.map((room) => (
-        <div key={room.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <img
-            src={room.imageUrls[0]}
-            alt={`Room ${room.roomNumber}`}
-            className="w-full h-48 object-cover"
-          />
-          <div className="p-4">
-            <h3 className="text-xl font-semibold mb-2 text-text-dark">{room.roomType}</h3>
-            <p className="text-text-light mb-2">{room.description}</p>
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-bold text-primary">${room.pricePerNight}/night</span>
-              <span className="text-sm text-text-light">Capacity: {room.capacity}</span>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {room.amenities.map((amenity, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-1 bg-background-light text-text-dark text-sm rounded-full"
-                >
-                  {amenity}
-                </span>
-              ))}
-            </div>
-            <button
-              onClick={() => handleBooking(room.id)}
-              className={`w-full py-2 px-4 rounded-lg ${
-                room.isAvailable
-                  ? 'bg-primary hover:bg-primary-dark text-white'
-                  : 'bg-gray-300 cursor-not-allowed'
-              }`}
-              disabled={!room.isAvailable}
-            >
-              {room.isAvailable ? 'Book Now' : 'Not Available'}
-            </button>
-          </div>
+            {error && (
+                <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
+                    {error}
+                </div>
+            )}
+
+            {filteredRooms.length === 0 ? (
+                <div className="text-center py-8 text-gray-600">
+                    <p>No rooms available matching your criteria.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredRooms.map((room) => (
+                        <RoomCard
+                            key={room.id}
+                            room={room}
+                            onBooking={handleBooking}
+                            checkIn={filters.checkIn}
+                            checkOut={filters.checkOut}
+                            calculateNights={calculateNights}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
-      ))}
-    </div>
-  );
+    );
 } 

@@ -7,11 +7,14 @@ from .room import room_bp
 # Create a health check blueprint
 health_bp = Blueprint('health', __name__)
 
-@health_bp.route('/health', methods=['GET'])
+@health_bp.route('/check', methods=['GET'])
 def health_check():
-    return jsonify({
-        'status': 'healthy',
-        'message': 'API is running'
-    })
+    return jsonify({'status': 'healthy'})
 
-__all__ = ['auth_bp', 'booking_bp', 'payment_bp', 'room_bp', 'health_bp'] 
+__all__ = [
+    'auth_bp',
+    'booking_bp',
+    'payment_bp',
+    'room_bp',
+    'health_bp'
+] 

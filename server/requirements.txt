@@ -7,4 +7,9 @@ psycopg2-binary==2.9.9
 python-dotenv==0.19.0
 SQLAlchemy==1.4.23
 stripe==2.65.0
-Werkzeug==2.0.1 
+Werkzeug==2.0.1
+alembic==1.7.1
+pytest==6.2.5
+black==21.9b0
+flake8==3.9.2
+Pillow==10.1.0

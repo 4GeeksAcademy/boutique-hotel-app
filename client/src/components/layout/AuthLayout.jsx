@@ -7,11 +7,9 @@ const AuthLayout = ({ children, title, subtitle }) => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <Link to="/" className="flex justify-center">
-            <img
-              className="h-12 w-auto"
-              src="/logo.png"
-              alt="Your Logo"
-            />
+            <div className="text-3xl font-bold text-primary">
+              Boutique Hotel
+            </div>
           </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             {title}

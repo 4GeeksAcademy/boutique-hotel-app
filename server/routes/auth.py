@@ -24,7 +24,9 @@ def validate_register_data(data):
 def register():
     try:
         logger.info("Received registration request")
+        logger.info(f"Headers: {request.headers}")
         data = request.get_json()
+        logger.info(f"Request data: {data}")
         
         if not data:
             logger.error("No data provided in registration request")
@@ -54,8 +56,14 @@ def register():
         logger.error(traceback.format_exc())  # Log the full traceback
         return jsonify({'error': str(e)}), 500
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
+    """Handle login requests"""
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        return response
+
     try:
         logger.info("Login request received")
         data = request.get_json()
@@ -64,46 +72,68 @@ def login():
             logger.error("No data provided in login request")
             raise ValidationError('No data provided')
             
-        logger.info(f"Login attempt for email: {data.get('email')}")
+        email = data.get('email')
+        password = data.get('password')
         
-        if not data.get('email') or not data.get('password'):
+        if not email or not password:
             raise ValidationError('Email and password are required')
             
         # Create AuthService instance
         auth_service = AuthService()
-        token, user = auth_service.login_user(data['email'], data['password'])
+        token, user = auth_service.login_user(email, password)
         
-        logger.info(f"Login successful for user: {user.email}")
-        return jsonify({
+        if not user:
+            raise AuthenticationError('Invalid credentials')
+        
+        logger.info(f"Login successful for user: {email}")
+        response = jsonify({
             'token': token,
             'user': user.to_dict(),
             'message': 'Login successful'
         })
         
+        # Set token in cookie for better security
+        response.set_cookie(
+            'token',
+            token,
+            httponly=True,
+            secure=False,  # Set to True in production with HTTPS
+            samesite='Lax',
+            max_age=86400  # 24 hours
+        )
+        
+        # Add CORS headers explicitly for this response
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        
+        return response
+        
     except (AuthenticationError, ValidationError) as e:
-        logger.error(f"Login validation error: {str(e)}")
+        logger.error(f"Login error: {str(e)}")
         return jsonify({'error': str(e)}), e.status_code
     except Exception as e:
         logger.error(f"Unexpected error during login: {str(e)}")
-        logger.error(traceback.format_exc())  # Log the full traceback
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
     try:
         current_user_id = get_jwt_identity()
-        user = AuthService.get_user_by_id(current_user_id)
+        logger.info(f"Fetching current user with ID: {current_user_id}")
         
+        user = User.query.get(current_user_id)
         if not user:
-            raise AuthenticationError('User not found')
+            logger.error(f"No user found with ID: {current_user_id}")
+            return jsonify({'error': 'User not found'}), 404
             
+        logger.info(f"Successfully fetched user: {user.email}")
         return jsonify(user.to_dict())
         
-    except AuthenticationError as e:
-        return jsonify({'error': str(e)}), e.status_code
     except Exception as e:
-        return jsonify({'error': 'An unexpected error occurred'}), 500
+        logger.error(f"Error in get_current_user: {str(e)}")
+        logger.error(traceback.format_exc())  # Log the full traceback
+        return jsonify({'error': 'Internal server error'}), 500
 
 @auth_bp.route('/forgot-password', methods=['POST'])
 def forgot_password():
@@ -156,23 +186,43 @@ def update_profile():
         current_user_id = get_jwt_identity()
         user = User.query.get_or_404(current_user_id)
         data = request.get_json()
+        logger.info(f"Updating profile for user {current_user_id} with data: {data}")
         
+        # Validate data
+        if not data:
+            raise ValidationError('No data provided')
+            
+        # Update fields if provided
         if 'firstName' in data:
             user.first_name = data['firstName']
         if 'lastName' in data:
             user.last_name = data['lastName']
         if 'email' in data:
-            # Check if email is already taken
+            # Check if email is already taken by another user
             existing_user = User.query.filter_by(email=data['email']).first()
             if existing_user and existing_user.id != current_user_id:
-                return jsonify({'error': 'Email already taken'}), 400
+                raise ValidationError('Email already taken')
             user.email = data['email']
+        if 'phone' in data:
+            user.phone = data['phone']
             
-        db.session.commit()
-        return jsonify(user.to_dict())
+        # Add any additional fields you want to update
         
+        db.session.commit()
+        logger.info(f"Profile updated successfully for user {current_user_id}")
+        
+        # Return updated user data
+        return jsonify({
+            'message': 'Profile updated successfully',
+            'user': user.to_dict()
+        })
+        
+    except ValidationError as e:
+        logger.error(f"Validation error updating profile: {str(e)}")
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
+        db.session.rollback()
         return jsonify({'error': 'Failed to update profile'}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -194,3 +244,17 @@ def logout():
     except Exception as e:
         logger.error(f"Error during logout: {str(e)}")
         return jsonify({'error': 'Logout failed'}), 500
+
+@auth_bp.route('/test-auth', methods=['GET'])
+@jwt_required()
+def test_auth():
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        return jsonify({
+            'message': 'Authentication successful',
+            'user': user.to_dict()
+        })
+    except Exception as e:
+        logger.error(f"Test auth error: {str(e)}")
+        return jsonify({'error': str(e)}), 500

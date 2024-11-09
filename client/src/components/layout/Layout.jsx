@@ -1,28 +1,21 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import Navbar from './Navbar';
+import { useAuth } from '../../contexts/AuthContext';
+import LoadingSpinner from '../ui/LoadingSpinner';
 import Footer from './Footer';
 
-const Layout = ({ children }) => {
-  const location = useLocation();
-  
-  // List of routes that should use AuthLayout
-  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-  const isAuthPage = authRoutes.includes(location.pathname);
+export default function Layout({ children }) {
+    const { loading } = useAuth();
 
-  if (isAuthPage) {
-    return children; // AuthLayout is already included in auth components
-  }
+    if (loading) {
+        return <LoadingSpinner />;
+    }
 
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow">
-        {children}
-      </main>
-      <Footer />
-    </div>
-  );
-};
-
-export default Layout; 
+    return (
+        <div className="min-h-screen flex flex-col relative">
+            <main className="flex-grow">
+                {children}
+            </main>
+            <Footer />
+        </div>
+    );
+} 

@@ -1,46 +1,36 @@
 from flask import jsonify
-from werkzeug.exceptions import HTTPException
-from sqlalchemy.exc import SQLAlchemyError
-from exceptions import APIError
-import logging
-
-logger = logging.getLogger(__name__)
+from exceptions import AuthenticationError, ValidationError, APIError
+from flask_jwt_extended.exceptions import JWTExtendedException
+from jwt.exceptions import PyJWTError
 
 def register_error_handlers(app):
+    @app.errorhandler(AuthenticationError)
+    @app.errorhandler(ValidationError)
     @app.errorhandler(APIError)
     def handle_api_error(error):
-        logger.error(f"API Error: {error.message}")
-        return jsonify(error.to_dict()), error.status_code
+        return jsonify({
+            'error': str(error),
+            'status': error.status_code
+        }), error.status_code
 
-    @app.errorhandler(HTTPException)
-    def handle_http_error(error):
-        logger.error(f"HTTP Error: {error}")
-        response = {
-            'error': {
-                'code': error.code,
-                'message': error.description
-            }
-        }
-        return jsonify(response), error.code
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return jsonify({
+            'error': 'Resource not found',
+            'status': 404
+        }), 404
 
-    @app.errorhandler(SQLAlchemyError)
-    def handle_db_error(error):
-        logger.error(f"Database Error: {str(error)}")
-        response = {
-            'error': {
-                'code': 500,
-                'message': 'A database error occurred'
-            }
-        }
-        return jsonify(response), 500
+    @app.errorhandler(500)
+    def internal_error(error):
+        return jsonify({
+            'error': 'Internal server error',
+            'status': 500
+        }), 500
 
-    @app.errorhandler(Exception)
-    def handle_generic_error(error):
-        logger.error(f"Unexpected Error: {str(error)}")
-        response = {
-            'error': {
-                'code': 500,
-                'message': 'An unexpected error occurred'
-            }
-        }
-        return jsonify(response), 500 
+    @app.errorhandler(JWTExtendedException)
+    @app.errorhandler(PyJWTError)
+    def handle_jwt_error(error):
+        return jsonify({
+            'error': 'Invalid or expired token',
+            'status': 401
+        }), 401 

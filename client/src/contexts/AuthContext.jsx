@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/auth.service';
 import { useNavigate } from 'react-router-dom';
-import jwtDecode from 'jwt-decode';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -16,72 +15,71 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // Check if user is logged in on mount
     useEffect(() => {
-        const initializeAuth = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    // Verify token is valid
-                    const decoded = jwtDecode(token);
-                    if (decoded.exp * 1000 < Date.now()) {
-                        // Token expired
-                        localStorage.removeItem('token');
-                        setUser(null);
-                    } else {
-                        // Get current user data
-                        const userData = await authService.getCurrentUser();
-                        setUser(userData);
-                    }
-                } catch (err) {
-                    localStorage.removeItem('token');
-                    setUser(null);
+        const checkAuth = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const response = await api.get('/auth/me');
+                    setUser(response.user);
                 }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('token');
+                setUser(null);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
-        initializeAuth();
+        checkAuth();
     }, []);
 
     const login = async (email, password) => {
         try {
-            setError(null);
-            const response = await authService.login({ email, password });
-            const { token, user } = response.data;
-            localStorage.setItem('token', token);
-            setUser(user);
-            navigate('/dashboard');
-            return true;
-        } catch (err) {
-            setError(err.response?.data?.error || 'Login failed');
-            throw err;
+            console.log('Attempting login with:', { email });
+            const response = await api.post('/auth/login', { email, password });
+            console.log('Login response:', response);
+
+            if (response.token && response.user) {
+                localStorage.setItem('token', response.token);
+                setUser(response.user);
+                navigate('/');
+                return response;
+            } else {
+                throw new Error('Invalid response format');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
         }
     };
 
     const register = async (userData) => {
         try {
-            setError(null);
-            const response = await authService.register(userData);
-            const { token, user } = response.data;
-            localStorage.setItem('token', token);
-            setUser(user);
-            navigate('/dashboard');
-            return true;
-        } catch (err) {
-            setError(err.response?.data?.error || 'Registration failed');
-            throw err;
+            const response = await api.post('/auth/register', userData);
+            
+            if (response.token && response.user) {
+                localStorage.setItem('token', response.token);
+                setUser(response.user);
+                navigate('/');
+                return response;
+            } else {
+                throw new Error('Invalid response format');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            throw error;
         }
     };
 
     const logout = async () => {
         try {
-            await authService.logout();
-        } catch (err) {
-            console.error('Logout error:', err);
+            await api.post('/auth/logout');
+        } catch (error) {
+            console.error('Logout error:', error);
         } finally {
             localStorage.removeItem('token');
             setUser(null);
@@ -89,32 +87,20 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const updateProfile = async (userData) => {
-        try {
-            setError(null);
-            const updatedUser = await authService.updateProfile(userData);
-            setUser(updatedUser);
-            return true;
-        } catch (err) {
-            setError(err.response?.data?.error || 'Profile update failed');
-            throw err;
-        }
-    };
-
     const value = {
         user,
         loading,
-        error,
+        isAuthenticated: !!user,
         login,
         register,
-        logout,
-        updateProfile,
-        isAuthenticated: !!user
+        logout
     };
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
-}; 
+};
+
+export { AuthContext };

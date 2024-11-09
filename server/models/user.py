@@ -13,6 +13,7 @@ class User(BaseModel):
     last_name = db.Column(db.String(50))
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    phone = db.Column(db.String(20))
     created_at = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
     updated_at = db.Column(db.TIMESTAMP, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     
@@ -38,13 +39,19 @@ class User(BaseModel):
             return False
 
     def to_dict(self):
-        return {
-            'id': self.id,
-            'email': self.email,
-            'firstName': self.first_name,
-            'lastName': self.last_name,
-            'created_at': self.created_at.isoformat() if self.created_at else None
-        }
+        try:
+            return {
+                'id': self.id,
+                'email': self.email,
+                'firstName': self.first_name,
+                'lastName': self.last_name,
+                'phone': self.phone,
+                'created_at': self.created_at.isoformat() if self.created_at else None,
+                'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            }
+        except Exception as e:
+            logger.error(f"Error serializing user: {str(e)}")
+            raise
 
     @classmethod
     def get_by_email(cls, email):
@@ -65,9 +72,15 @@ class User(BaseModel):
             raise
 
     @classmethod
-    def get_by_id(cls, id):
+    def get_by_id(cls, user_id):
         try:
-            return cls.query.get(id)
+            logger.info(f"Fetching user by ID: {user_id}")
+            user = cls.query.get(user_id)
+            if user:
+                logger.info(f"Found user: {user.email}")
+            else:
+                logger.warning(f"No user found with ID: {user_id}")
+            return user
         except Exception as e:
-            logger.error(f"Error getting user by id: {str(e)}")
-            return None
+            logger.error(f"Error fetching user by ID: {str(e)}")
+            raise

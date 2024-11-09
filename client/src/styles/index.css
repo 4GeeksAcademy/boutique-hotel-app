@@ -48,3 +48,11 @@
 .animate-geometric-twinkle {
   animation: geometric-twinkle 10s ease-in-out infinite;
 }
+
+.nav-link {
+    @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-primary border-b-2 border-transparent hover:border-primary;
+}
+
+.nav-link.active {
+    @apply border-primary text-primary;
+}

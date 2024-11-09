@@ -78,3 +78,34 @@ def webhook():
     except Exception as e:
         logger.error(f"Webhook error: {str(e)}")
         return jsonify({'error': str(e)}), 400
+
+@payment_bp.route('/process', methods=['POST'])
+@jwt_required()
+def process_payment():
+    try:
+        data = request.get_json()
+        booking_id = data.get('bookingId')
+        payment_intent_id = data.get('paymentIntentId')
+        
+        if not booking_id or not payment_intent_id:
+            return jsonify({'error': 'Booking ID and payment intent ID are required'}), 400
+            
+        booking = Booking.query.get_or_404(booking_id)
+        
+        # Ensure user owns this booking
+        current_user_id = get_jwt_identity()
+        if booking.user_id != current_user_id:
+            return jsonify({'error': 'Unauthorized'}), 403
+            
+        # Update booking status
+        booking.booking_status = 'confirmed'
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Payment processed successfully',
+            'booking': booking.to_dict()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error processing payment: {str(e)}")
+        return jsonify({'error': str(e)}), 500

@@ -1,38 +1,40 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm } from '../components/features/auth';
 import { useAuth } from '../contexts/AuthContext';
 
 export const authRoutes = [
   {
     path: '/login',
-    element: <LoginForm />,
-    loader: () => {
-      const { user } = useAuth();
-      return user ? <Navigate to="/dashboard" /> : null;
+    element: ({ children }) => {
+      const { isAuthenticated } = useAuth();
+      const location = useLocation();
+      
+      if (isAuthenticated) {
+        return <Navigate to={location.state?.from || '/'} replace />;
+      }
+      
+      return <LoginForm />;
     }
   },
   {
     path: '/register',
-    element: <RegisterForm />,
-    loader: () => {
-      const { user } = useAuth();
-      return user ? <Navigate to="/dashboard" /> : null;
+    element: ({ children }) => {
+      const { isAuthenticated } = useAuth();
+      const location = useLocation();
+      
+      if (isAuthenticated) {
+        return <Navigate to={location.state?.from || '/'} replace />;
+      }
+      
+      return <RegisterForm />;
     }
   },
   {
     path: '/forgot-password',
-    element: <ForgotPasswordForm />,
-    loader: () => {
-      const { user } = useAuth();
-      return user ? <Navigate to="/dashboard" /> : null;
-    }
+    element: <ForgotPasswordForm />
   },
   {
     path: '/reset-password',
-    element: <ResetPasswordForm />,
-    loader: () => {
-      const { user } = useAuth();
-      return user ? <Navigate to="/dashboard" /> : null;
-    }
+    element: <ResetPasswordForm />
   }
 ]; 

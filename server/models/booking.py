@@ -18,10 +18,13 @@ class Booking(BaseModel):
     check_in_date = db.Column(db.Date, nullable=False)
     check_out_date = db.Column(db.Date, nullable=False)
     booking_status = db.Column(db.String(20), nullable=False)
+    number_of_nights = db.Column(db.Integer, nullable=False)
+    total_price = db.Column(db.Numeric(10, 2), nullable=False)
     created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def __init__(self, user_id, room_id, check_in_date, check_out_date, booking_status=STATUS_PENDING):
+    def __init__(self, user_id, room_id, check_in_date, check_out_date, 
+                 booking_status=STATUS_PENDING, number_of_nights=None, total_price=None):
         self.user_id = user_id
         self.room_id = room_id
         self.check_in_date = check_in_date
@@ -29,15 +32,20 @@ class Booking(BaseModel):
         if booking_status not in self.VALID_STATUSES:
             raise ValueError(f"Invalid booking status. Must be one of: {', '.join(self.VALID_STATUSES)}")
         self.booking_status = booking_status
+        self.number_of_nights = number_of_nights
+        self.total_price = total_price
 
     def to_dict(self):
         return {
             'id': self.id,
             'userId': self.user_id,
             'roomId': self.room_id,
+            'room': self.room.to_dict(),
             'checkInDate': self.check_in_date.isoformat(),
             'checkOutDate': self.check_out_date.isoformat(),
             'bookingStatus': self.booking_status,
+            'numberOfNights': self.number_of_nights,
+            'totalPrice': float(self.total_price),
             'createdAt': self.created_at.isoformat() if self.created_at else None
         }
 
